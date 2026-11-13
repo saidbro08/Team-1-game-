@@ -24,9 +24,9 @@ Players can use a **keyboard**, a **gamepad**, or a custom **ESP32 + PSX (PS2) c
 
 | Name | Role |
 |------|------|
-| Student 1 – *(replace)* | Game design, client (rendering, UI) |
-| Student 2 – *(replace)* | Server, networking, game logic |
-| Student 3 – *(replace)* | Controller (ESP32 / Wokwi), testing, documentation |
+| Student 1 – Arlen Kaldaraliev | Game design, client (rendering, UI) |
+| Student 2 – Dmytro Simonov  | Server, networking, game logic |
+| Student 3 – Saidinov Tariel | Controller (ESP32 / Wokwi), testing, documentation |
 
 ## Status
 
