@@ -1,0 +1,77 @@
+<!doctype html>
+<meta charset="utf-8"><title>Neon Zone Royale</title>
+<style>
+  body{margin:0;background:#0b0b16;color:#e6e6ff;font:14px monospace;text-align:center}
+  canvas{background:#10102a;border:2px solid #0ff;margin-top:8px}
+  #ui{margin:8px}
+</style>
+<div id="ui"><input id="nameIn" placeholder="name"> <button id="joinBtn">Join</button> <button id="readyBtn" disabled>Ready</button> <span id="info"></span></div>
+<canvas id="c" width="800" height="600"></canvas>
+<script>
+const S = 0.5; // map 1600x1200 -> canvas 800x600
+const c = document.getElementById('c'), g = c.getContext('2d');
+let ws, me = null, snap = null, lobby = [], isReady = false, state = 'lobby', msg = '', firing = false, angle = 0;
+const keys = {}; let lastMove = '';
+const send = (command, data = {}) => ws && ws.readyState === 1 && ws.send(JSON.stringify({ command, ts: Date.now(), data }));
+
+joinBtn.onclick = () => {
+  ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
+  ws.onopen = () => send('join_game', { name: nameIn.value || 'player' });
+  ws.onmessage = e => on(JSON.parse(e.data));
+  ws.onclose = () => info.textContent = 'disconnected';
+  joinBtn.disabled = true; readyBtn.disabled = false;
+};
+readyBtn.onclick = () => { isReady = !isReady; send('set_ready', { ready: isReady }); };
+
+function on({ event, data }) {
+  if (event === 'player_welcomed') me = data.playerId;
+  else if (event === 'lobby_updated') lobby = data.players;
+  else if (event === 'match_started') { state = 'play'; msg = ''; snap = null; }
+  else if (event === 'state_updated') snap = data;
+  else if (event === 'player_eliminated' && data.victimId === me) msg = `You were eliminated (#${data.placement})`;
+  else if (event === 'match_ended') {
+    state = 'lobby'; isReady = false;
+    const w = data.results.find(r => r.id === data.winnerId);
+    msg = data.winnerId === me ? 'YOU WIN!' : `Winner: ${w ? w.name : '-'}`;
+  } else if (event === 'command_rejected') msg = data.message;
+}
+
+addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; sendMove(); });
+addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; sendMove(); });
+function sendMove() {
+  const dx = (keys.d ? 1 : 0) - (keys.a ? 1 : 0), dy = (keys.s ? 1 : 0) - (keys.w ? 1 : 0);
+  if (dx + ',' + dy !== lastMove) { lastMove = dx + ',' + dy; send('move', { dx, dy }); }
+}
+c.onmousemove = e => {
+  const r = c.getBoundingClientRect(), p = snap && snap.players.find(p => p.id === me);
+  if (p) { angle = Math.atan2(e.clientY - r.top - p.y * S, e.clientX - r.left - p.x * S); send('aim', { angle }); }
+};
+c.onmousedown = () => firing = true;
+addEventListener('mouseup', () => firing = false);
+setInterval(() => firing && state === 'play' && send('fire_weapon', { angle }), 100);
+
+function draw() {
+  g.clearRect(0, 0, 800, 600);
+  g.textAlign = 'center'; g.font = '14px monospace';
+  if (snap && state === 'play') {
+    g.strokeStyle = '#0ff'; g.lineWidth = 3; g.beginPath();
+    g.arc(snap.zone.cx * S, snap.zone.cy * S, snap.zone.r * S, 0, Math.PI * 2); g.stroke();
+    g.fillStyle = '#ff0'; snap.bullets.forEach(b => g.fillRect(b.x * S - 2, b.y * S - 2, 4, 4));
+    snap.players.filter(p => p.alive).forEach(p => {
+      g.fillStyle = p.id === me ? '#3f6' : '#f5a';
+      g.beginPath(); g.arc(p.x * S, p.y * S, 7, 0, Math.PI * 2); g.fill();
+      g.fillRect(p.x * S - 12, p.y * S - 16, 24 * p.hp / 100, 3);
+      g.fillStyle = '#fff'; g.fillText(p.name, p.x * S, p.y * S - 20);
+    });
+    g.textAlign = 'left'; g.fillStyle = '#fff'; g.fillText(`Alive: ${snap.alive}`, 10, 20);
+    g.textAlign = 'center';
+  } else {
+    g.fillStyle = '#fff';
+    g.fillText('LOBBY (2-8 players, everyone must press Ready)', 400, 40);
+    lobby.forEach((p, i) => g.fillText(`${p.name} ${p.ready ? '[READY]' : ''}`, 400, 80 + i * 22));
+  }
+  if (msg) { g.font = '24px monospace'; g.fillStyle = '#ff0'; g.fillText(msg, 400, 300); }
+  requestAnimationFrame(draw);
+}
+draw();
+</script>

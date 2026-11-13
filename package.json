@@ -1,0 +1,10 @@
+{
+  "name": "neon-zone-royale",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "server": "node server/index.js",
+    "consumer:leaderboard": "node consumers/leaderboard.js"
+  },
+  "dependencies": { "dotenv": "^16.4.5", "ws": "^8.18.0" }
+}
