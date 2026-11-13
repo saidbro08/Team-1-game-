@@ -1,53 +1,44 @@
-# Team-1-game-
-# LAST DROP
-### Multiplayer Battle Royale Game
+# 🔥 Neon Zone Royale
 
-**LAST DROP** is an online multiplayer Battle Royale game set on a dangerous abandoned industrial island. Players must collect weapons, find resources, survive environmental hazards and eliminate their opponents to become the last survivor.
+A **2D top-down browser** (Phaser) **multiplayer online battle royale** with a Node.js **WebSocket** server. 2–8 players are dropped onto one small neon-lit arena, scavenge weapons, and fight while the safe zone keeps shrinking. The last survivor wins.
 
-> The water is rising. Make your last move count.
+Players can use a **keyboard**, a **gamepad**, or a custom **ESP32 + PSX (PS2) controller** simulated in [Wokwi](https://wokwi.com).
 
----
+## Short description
 
-## Team Members
+- Genre: top-down shooter / battle royale
+- Players per match: 2–8 (bots optional)
+- Match length: ~3 minutes
+- Map: one small 2D arena
+- Goal: be the last player alive
 
-| Student | Role |
-|---|---|
-| Arlen Kaldaraliev | Lead Architect, Backend and Event Pipeline |
-| Dmytro Simonov | Gameplay Mechanics and State Synchronization |
-| Saidinov Tariel | Frontend Rendering and UI/UX |
+## Documentation
 
-## Project Description
+| File | Content |
+|------|---------|
+| [`concept.md`](concept.md) | Game concept: story, characters, scenarios, rules, items |
+| [`game_events.md`](game_events.md) | All events (past tense) with producer, consumer and payload |
+| [`tech_design.md`](tech_design.md) | Tech stack, architecture, controllers (Wokwi PSX controller) |
 
-LAST DROP is a multiplayer survival game inspired by the Battle Royale genre.
+## Team
 
-Players are transported to an abandoned island called Breakwater-9. The island is slowly being flooded by contaminated water. Players must explore the environment, collect equipment, fight other contestants and stay inside the safe zone.
+| Name | Role |
+|------|------|
+| Student 1 – *(replace)* | Game design, client (rendering, UI) |
+| Student 2 – *(replace)* | Server, networking, game logic |
+| Student 3 – *(replace)* | Controller (ESP32 / Wokwi), testing, documentation |
 
-The last surviving player or team wins the match.
+## Status
 
-## Main Features
+- [x] Task 1 – Game design (concept, events, tech design)
+- [ ] Task 2 – Final game implementation
 
-- Online multiplayer gameplay.
-- Battle Royale survival mechanics.
-- Weapon collection and inventory management.
-- Multiple unique locations.
-- Dynamic shrinking safe zone.
-- Player health and armour systems.
-- Real-time combat and elimination.
-- Matchmaking and lobby system.
-- Live event synchronization between clients and server.
-- Final match results and leaderboard.
+## Quick start (planned)
 
-## Game Information
-
-| Property | Description |
-|---|---|
-| Game Name | LAST DROP |
-| Genre | Multiplayer Battle Royale |
-| Platform | PC |
-| Engine | Godot 4 |
-| Programming Language | GDScript |
-| Multiplayer | Client-Server Architecture |
-| Game Mode | Solo and Duos |
-| Maximum Players | 20 |
-| Average Match Duration | 10–15 minutes |
-| Map | Breakwater-9 |
+```bash
+git clone https://github.com/<your-team>/neon-zone-royale.git
+cd neon-zone-royale
+npm install
+npm run server      # starts the game server on ws://localhost:8080
+npm run client      # serves the web client on http://localhost:3000
+```
