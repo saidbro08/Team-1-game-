@@ -83,9 +83,9 @@ Full list with payloads: [`game_events.md`](game_events.md).
 
 | Consumer | Owner | Group | Reads | Result |
 |----------|-------|-------|-------|--------|
-| Leaderboard | Student 1 | `team1.leaderboard` | `team1.match`, `team1.combat` | Kills and wins table (rebuilt from the log) |
-| Achievements | Student 2 | `team1.achievements` | `team1.combat`, `team1.loot`, `team1.match` | Publishes `achievement_unlocked` |
-| Replay / spectator | Student 3 | `team1.replay` | all `team1.*` | Stored timeline of each match |
+| Leaderboard | Student 1 – Arlen Kaldaraliev | `team1.leaderboard` | `team1.match`, `team1.combat` | Kills and wins table (rebuilt from the log) |
+| Achievements | Student 2 – Dmytro Simonov | `team1.achievements` | `team1.combat`, `team1.loot`, `team1.match` | Publishes `achievement_unlocked` |
+| Replay / spectator | Student 3 – Saidinov Tariel | `team1.replay` | all `team1.*` | Stored timeline of each match |
 
 Consumer rules: own group per consumer, `auto.offset.reset = earliest`, poll with `timeout=1000`, retry on `50003 network_exception`.
 
