@@ -112,9 +112,9 @@ These messages are real-time or private, so they would only add load and latency
 
 | Consumer | Owner | Group | Topics | What it does | Output |
 |----------|-------|-------|--------|--------------|--------|
-| **Leaderboard** | Student 1 | `team1.leaderboard` | `team1.match`, `team1.combat` | Counts kills and wins per player; rebuilds the table by replaying from the start. | Console table / `/leaderboard` JSON |
-| **Achievements** | Student 2 | `team1.achievements` | `team1.combat`, `team1.loot`, `team1.match` | Detects achievements: `first_blood`, `sharpshooter` (10 hits), `survivor` (win without damage), `medic`. | Publishes `achievement_unlocked` |
-| **Replay / spectator** | Student 3 | `team1.replay` | all `team1.*` topics | Stores the ordered event log of each match and can replay it as a timeline. | `replays/<matchId>.json` |
+| **Leaderboard** |Arlen Kaldaraliev| `team1.leaderboard` | `team1.match`, `team1.combat` | Counts kills and wins per player; rebuilds the table by replaying from the start. | Console table / `/leaderboard` JSON |
+| **Achievements** |Dmytro Simonov| `team1.achievements` | `team1.combat`, `team1.loot`, `team1.match` | Detects achievements: `first_blood`, `sharpshooter` (10 hits), `survivor` (win without damage), `medic`. | Publishes `achievement_unlocked` |
+| **Replay / spectator** | Saidinov Tariel | `team1.replay` | all `team1.*` topics | Stores the ordered event log of each match and can replay it as a timeline. | `replays/<matchId>.json` |
 
 Every consumer has its **own group**, so each one receives **every** event.
 
