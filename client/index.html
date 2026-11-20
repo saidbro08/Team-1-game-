@@ -1,24 +1,137 @@
 <!doctype html>
 <meta charset="utf-8"><title>Neon Zone Royale</title>
 <style>
-  @font-face { font-family: ui-mono; src: local(monospace); }
-  body{margin:0;background:#0b0b16;color:#e6e6ff;font-family:'Courier New',monospace;text-align:center}
+  *{box-sizing:border-box}
+  body{margin:0;background:#06060f;color:#e6e6ff;font-family:'Courier New',monospace;text-align:center;overflow-x:hidden}
+
+  /* ---------------- menu screen: neon cyberpunk city ---------------- */
+  #menu{
+    position:relative;width:100%;height:100vh;min-height:600px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:
+      radial-gradient(ellipse at 50% 15%, rgba(0,255,255,.10), transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(255,0,170,.12), transparent 55%),
+      linear-gradient(#050510, #0a0a1f 55%, #0d0d26);
+    overflow:hidden;
+  }
+  /* procedurally generated skyline, two parallax layers */
+  #menu::before, #menu::after{
+    content:'';position:absolute;left:0;right:0;bottom:0;height:60%;
+    background-repeat:repeat-x;background-position:bottom;
+  }
+  #menu::before{
+    opacity:.55; height:48%;
+    background-image: repeating-linear-gradient(90deg,
+      #11112a 0 38px, #0d0d22 38px 40px, transparent 40px 90px);
+    -webkit-mask-image: linear-gradient(0deg, #000 60%, transparent 100%);
+            mask-image: linear-gradient(0deg, #000 60%, transparent 100%);
+  }
+  #menu::after{
+    height:62%;
+    background-image: repeating-linear-gradient(90deg,
+      #191942 0 60px, #141435 60px 64px, transparent 64px 150px);
+    -webkit-mask-image: linear-gradient(0deg, #000 55%, transparent 100%);
+            mask-image: linear-gradient(0deg, #000 55%, transparent 100%);
+  }
+  #winCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+  #menuContent{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0 16px}
+  #title1,#title2{
+    margin:0;font-weight:900;letter-spacing:6px;font-size:clamp(28px,6vw,58px);line-height:1.05;
+    text-transform:uppercase;
+  }
+  #title1{color:#ff3bd4;text-shadow:0 0 6px #ff3bd4,0 0 22px #ff3bd4,0 0 46px #b0009f;}
+  #title2{color:#2be8ff;text-shadow:0 0 6px #2be8ff,0 0 22px #2be8ff,0 0 46px #0096a8;}
+  #subtitle{
+    margin:2px 0 26px;color:#bfe9ff;letter-spacing:10px;font-size:13px;font-weight:bold;
+    text-shadow:0 0 8px rgba(100,220,255,.6);
+  }
+
+  .neonField{
+    display:flex;align-items:center;gap:10px;width:min(360px,80vw);
+    background:rgba(8,10,26,.75);border:2px solid #2be8ff;border-radius:8px;
+    padding:12px 16px;margin-bottom:16px;box-shadow:0 0 14px rgba(43,232,255,.35), inset 0 0 10px rgba(43,232,255,.08);
+  }
+  .neonField svg{flex:none;width:20px;height:20px}
+  #nameIn{
+    flex:1;background:transparent;border:none;outline:none;color:#eafcff;
+    font-family:inherit;font-size:16px;letter-spacing:2px;text-transform:uppercase;
+  }
+  #nameIn::placeholder{color:#5f7a92}
+
+  #joinBtn{
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    width:min(360px,80vw);padding:16px;font-family:inherit;font-weight:900;font-size:20px;letter-spacing:4px;
+    color:#0ff;background:rgba(8,10,26,.75);border:2px solid #2be8ff;border-radius:8px;cursor:pointer;
+    box-shadow:0 0 16px rgba(43,232,255,.45), inset 0 0 12px rgba(43,232,255,.12);
+    transition:transform .12s, box-shadow .12s;
+  }
+  #joinBtn svg{width:22px;height:22px}
+  #joinBtn:hover:not(:disabled){transform:scale(1.03);box-shadow:0 0 26px rgba(43,232,255,.8), inset 0 0 16px rgba(43,232,255,.25)}
+  #joinBtn:disabled{opacity:.35;cursor:default}
+  #menuMsg{min-height:20px;color:#ff5a7a;font-size:13px;letter-spacing:1px;margin-top:4px}
+
+  /* ---------------- in-game screen ---------------- */
+  #game{display:none}
   #wrap{display:inline-block;margin-top:10px}
-  canvas{background:#10102a;border:3px solid #0ff;border-radius:4px;image-rendering:pixelated}
+  canvas#c{background:#10102a;border:3px solid #0ff;border-radius:4px;image-rendering:pixelated}
   #ui{margin:8px;display:flex;gap:8px;justify-content:center;align-items:center}
-  input,button{font-family:inherit;font-size:14px;padding:6px 10px;border-radius:4px;border:2px solid #0ff;background:#10102a;color:#e6e6ff}
-  button{cursor:pointer}
-  button:hover:not(:disabled){background:#0ff;color:#10102a}
-  button:disabled{opacity:.4;cursor:default}
+  #readyBtn{font-family:inherit;font-size:14px;padding:6px 14px;border-radius:4px;border:2px solid #0ff;background:#10102a;color:#e6e6ff;cursor:pointer}
+  #readyBtn:hover{background:#0ff;color:#10102a}
 </style>
-<div id="wrap">
-  <div id="ui">
-    <input id="nameIn" placeholder="your name" maxlength="16">
-    <button id="joinBtn">PLAY</button>
-    <button id="readyBtn" disabled>READY</button>
+
+<div id="menu">
+  <canvas id="winCanvas"></canvas>
+  <div id="menuContent">
+    <h1 id="title1">Neon Zone</h1>
+    <h1 id="title2">Royale</h1>
+    <div id="subtitle">BATTLE ROYALE</div>
+
+    <label class="neonField">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#2be8ff" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+      <input id="nameIn" placeholder="ENTER NICKNAME" maxlength="16">
+    </label>
+
+    <button id="joinBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0ff" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h.01M9 10v4"/><circle cx="16" cy="10.5" r="1"/><circle cx="18" cy="13" r="1"/></svg>
+      PLAY
+    </button>
+    <div id="menuMsg"></div>
   </div>
-  <canvas id="c" width="800" height="600"></canvas>
 </div>
+
+<div id="game">
+  <div id="wrap">
+    <div id="ui"><button id="readyBtn" disabled>READY</button></div>
+    <canvas id="c" width="800" height="600"></canvas>
+  </div>
+</div>
+
+<script>
+// --- animated neon city "windows" sparkle on the menu background ---
+(function cityLights(){
+  const wc = document.getElementById('winCanvas');
+  function size(){ wc.width = innerWidth; wc.height = innerHeight; }
+  size(); addEventListener('resize', size);
+  const wctx = wc.getContext('2d');
+  const dots = Array.from({length:70}, () => ({
+    x: Math.random(), y: 0.45 + Math.random()*0.5,
+    c: Math.random() < 0.5 ? '#2be8ff' : '#ff3bd4',
+    p: Math.random()*Math.PI*2, s: 1 + Math.random()*2,
+  }));
+  function tick(t){
+    wctx.clearRect(0,0,wc.width,wc.height);
+    for(const d of dots){
+      const a = 0.25 + 0.75*Math.abs(Math.sin(t/900 + d.p));
+      wctx.fillStyle = d.c; wctx.globalAlpha = a*0.8;
+      wctx.fillRect(d.x*wc.width, d.y*wc.height, d.s, d.s*2);
+    }
+    wctx.globalAlpha = 1;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
 <script>
 const S = 0.5; // world 1600x1200 -> canvas 800x600
 const c = document.getElementById('c'), g = c.getContext('2d');
@@ -68,15 +181,22 @@ const tile = document.createElement('canvas'); tile.width = 32; tile.height = 32
   tx.strokeStyle = '#22224a'; tx.strokeRect(0, 0, 32, 32); }
 const groundPattern = g.createPattern(tile, 'repeat');
 
+const menuEl = document.getElementById('menu'), gameEl = document.getElementById('game'), menuMsgEl = document.getElementById('menuMsg');
+
 joinBtn.onclick = () => {
   const name = nameIn.value.trim();
-  if (!name) { nameIn.focus(); return; }
+  if (!name) { menuMsgEl.textContent = 'Enter a nickname first'; nameIn.focus(); return; }
+  joinBtn.disabled = true; nameIn.disabled = true; menuMsgEl.textContent = '';
   ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
   ws.onopen = () => send('join_game', { name });
   ws.onmessage = e => on(JSON.parse(e.data));
-  ws.onclose = () => { msg = 'Disconnected'; state = 'menu'; joinBtn.disabled = false; readyBtn.disabled = true; };
-  joinBtn.disabled = true; readyBtn.disabled = false; nameIn.disabled = true;
+  ws.onclose = () => {
+    state = 'menu'; menuEl.style.display = 'flex'; gameEl.style.display = 'none';
+    joinBtn.disabled = false; nameIn.disabled = false; menuMsgEl.textContent = 'Disconnected';
+  };
   state = 'lobby';
+  menuEl.style.display = 'none'; gameEl.style.display = 'block';
+  readyBtn.disabled = false;
 };
 readyBtn.onclick = () => { isReady = !isReady; readyBtn.textContent = isReady ? 'CANCEL' : 'READY'; send('set_ready', { ready: isReady }); };
 
@@ -115,14 +235,7 @@ function draw() {
   g.clearRect(0, 0, 800, 600);
   g.textAlign = 'center';
 
-  if (state === 'menu') {
-    g.fillStyle = '#10102a'; g.fillRect(0, 0, 800, 600);
-    g.fillStyle = '#0ff'; g.font = 'bold 48px monospace';
-    g.fillText('NEON ZONE', 400, 250);
-    g.fillText('ROYALE', 400, 305);
-    g.font = '14px monospace'; g.fillStyle = '#9ad';
-    g.fillText('type your name above and press PLAY', 400, 360);
-  } else if (state === 'lobby') {
+  if (state === 'lobby') {
     drawGround();
     g.font = 'bold 20px monospace'; g.fillStyle = '#0ff';
     g.fillText('LOBBY', 400, 50);
